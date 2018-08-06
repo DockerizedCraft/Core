@@ -1,0 +1,197 @@
+# Type: Section
+docker:
+  # Is the docker listener enabled? This is the core functionality and should stay enabled
+  # Type: Boolean
+  enabled: true
+
+  # Ensure the read permissions
+  # available schemas: tcp or unix
+  # Type: String
+  host: unix:///var/run/docker.sock
+  # Type: Boolean
+  tsl_verify: false
+  # Type: String|null
+  cert_path: ~
+  # Type: String|null
+  registry_username: ~
+  # Type: String|null
+  registry_password: ~
+  # Type: String|null
+  registry_email: ~
+  # Type: String|null
+  registry_url: ~
+
+
+  # Type: Section
+  event_listener:
+    # Container event actions to listen on for adding server
+    # i.e.: "start", "health_status: healthy"
+    # Recommended "start", "bootstrap" and health checks
+    # the "bootstrap" event is triggered when connection starts to register all running containers. Should ne be removed
+    # If you want to add only healthy containers be aware of removing "start" action
+    # @see https://docs.docker.com/engine/reference/commandline/events/#object-types
+    # Type: List
+    add_actions:
+      - "bootstrap"
+      - "start"
+      - "health_status: healthy"
+      - "unpause"
+
+    # Container event actions to listen on for remving server
+    # i.e.: "kill", "die"
+    # Recommended "die" and health checks
+    # If you want to remove unhealthy containers add i.e: "health_status: unhealthy"
+    # @see https://docs.docker.com/engine/reference/commandline/events/#object-types
+    # Type: List
+    remove_actions:
+      - "kill"
+      - "die"
+      - "stop"
+      - "pause"
+
+    # The network name to resolve IP addresses
+    # Only one network is possible to avoid confusion about which ip to use
+    # check your networks with `docker network ls`
+    network: "minecraft_local"
+
+    # Environment variables of the containers
+    # Type: Section
+    environment_variables:
+      # The event listener will only add server with the defined environment variable
+      # ie. docker run -e SERVER_TYPE=minecraft_spigot my_server
+      # Type: String
+      identifier: SERVER_TYPE
+
+      # Be default the first exposed port is taken if the container exposes multiple ports you can
+      # set it by setting the PORT environment variable in the container
+      # If you exposed multiple ports its highly recommended to set the environment variable
+      # Type: String
+      port_key: SERVER_PORT
+
+      # Setting the motd in the Bungeecord setting
+      # i.e. docker run -e SERVER_FORCED_HOST="Another Minecraft Server" playerworld:latest
+      # Type: String
+      motd_key: SERVER_MOTD
+
+      # Setting the server to restricted
+      # If not set it is false, only excepts: "restricted" or "unrestricted"
+      # i.e. docker run -e SERVER_RESTRICTED=true playerworld:latest
+      # Type: String
+      restricted_key: SERVER_RESTRICTED
+
+      # Each server name needs to be unique
+      # If you are not able to control if it is unique (autoscaling or whatever) you should not set it in your container
+      # If you do not set the environment variable the container name itself will be used
+      # Two server with the same name will overwrite each other
+      # Type: String
+      name_key: SERVER_NAME
+
+
+
+# Type: Section
+connection_balancer:
+  # Care if you disable it you will need to configure default, priority and fallback servers by hand
+  # Or use an different connection handler plugin (Is it compatible?)
+  # Type: Boolean
+  enabled: true
+
+  player_session_store:
+    enabled: true
+    redis:
+      host: "redis"
+      port: 6379
+      ssl: false
+
+  # Environment variables of the containers
+  # Type: Section
+  environment_variables:
+    # If the environment variable is set the server will be added to the priority list of connection
+    # This plugin implemented a custom load balancer which will use defined groups
+    # Leaving the env variable blank will add the server to the default group
+    # Type: String
+    group_key: SERVER_GROUP
+
+    # To enable forced host for the single instance.
+    # You can also configure a forced host for a whole group. See groups config. I would recommend to do so event with single instances
+    # i.e. docker run -e SERVER_FORCED_HOST=muehre.craftmania.de playerworld:latest
+    # Type: String
+    forced_host_key: SERVER_FORCED_HOST
+
+  # Type: Section
+  # check docker.event_listener.environment_variables.group_key
+  groups:
+    # Server group configuration
+    # default group is used if a a container does not have a group environment variable. You can also configure it here
+    # Type: Section<Group>
+    # Group:
+    # - strategy(String): balance is the only strategy atm. I will implement more as soon as they are required
+    # - forced_host(String) Optional: people joining over this host will be send to this group
+    # - can_reconnect(Boolean) Default: false: if a player can reconnect to this group. Usefull to  disable for i.e minigames
+    # - restricted(Boolean) Default: false: Is a permission required?
+    eu-lobby:
+      strategy: balance
+      can_reconnect: true
+      restricted: false
+
+    game-xy:
+      strategy: balance
+      can_reconnect: false
+      restricted: false
+
+    private:
+      strategy: balance
+      can_reconnect: true
+      restricted: false
+
+    us-lobby:
+      strategy: balance
+      can_reconnect: true
+      restricted: false
+
+  # The default group a user is connected to if he freshly joins or his group was restricted in re-connections.
+  # And not forced host is matching
+  # Type: String
+  default_group: eu-lobby
+
+  forced_hosts:
+    'us.mynetwork.net': us-lobby
+    'eu.mynetwork.net': eu-lobby
+
+# Sends server stats to bukkit plugins
+plugin_notifier:
+  # If you disable it no plugin which depends on this data will work
+  # Type: Boolean
+  enabled: true
+
+  # Maps environment variables and forwards them with the specified key to the bukkit client plugin
+  # ie. docker run -e CATEGORY=factions
+  # Reserved keys as they will be handed down anyway: name, address, motd, restricted (In case you want to overwrite you can do so)
+  # Type: Section<String:MetaDataConfig>
+  # Type MetaDataConfig:
+  #   - environment_variable (string): The environemnt variable to access
+  #   - required (bool):               Is this value required? If not given and no default
+  #                                    is defined the server will not be added to connection
+  #   - default (string):              If the environment variable is not defined will fall
+  #                                    back to the given default
+  meta_data_mapper:
+    # make the SERVER_TYPE also accessible
+    type:
+      required: true
+      environment_variable: SERVER_TYPE
+
+    # Category for i.e create server selector menus based on categories
+    category:
+      environment_variable: SERVER_CATEGORY
+      required: true
+      default: "none"
+
+    tags:
+      environment_variable: SERVER_TAGS
+      required: true
+      default: ""
+
+# Type: Section
+debug:
+  # Enable output information about redundant remove/add actions or ip refreshing
+  # Type: boolean
+  docker_event_observer: false

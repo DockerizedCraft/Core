@@ -1,0 +1,4 @@
+name: ContainerManager
+main: de.craftmania.dockerized_craft.container_management.ContainerManager
+version: 1.0
+author: Muehre

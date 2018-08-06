@@ -1,0 +1,65 @@
+version: '3'
+services:
+  bungeecord:
+    image: itzg/bungeecord
+    environment:
+      - UID=1000
+    ports:
+      - 25565:25577
+    volumes:
+      - ./target/assembly/ContainerManager.jar:/server/plugins/ContainerManager.jar
+      - //var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - local
+
+  redis:
+    image: bitnami/redis:latest
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    networks:
+      - local
+
+  eu-lobby-1:
+    image: itzg/minecraft-server
+    environment:
+      - VERSION=1.12.2
+      - SERVER_TYPE=spigot
+      - SERVER_PORT=25565
+      - SERVER_NAME=eu-lobby-1
+      - SERVER_GROUP=eu-lobby
+      - SERVER_CATEGORY=eu-lobby
+      - ONLINE_MODE=FALSE
+      - EULA=true
+    networks:
+      - local
+
+  eu-lobby-2:
+    image: itzg/minecraft-server
+    environment:
+      - VERSION=1.12.2
+      - SERVER_TYPE=spigot
+      - SERVER_PORT=25565
+      - SERVER_NAME=eu-lobby-2
+      - SERVER_GROUP=eu-lobby
+      - SERVER_CATEGORY=eu-lobby
+      - ONLINE_MODE=FALSE
+      - EULA=true
+    networks:
+      - local
+
+  us-lobby-1:
+    image: itzg/minecraft-server
+    environment:
+    - VERSION=1.12.2
+    - SERVER_TYPE=spigot
+    - SERVER_PORT=25565
+    - SERVER_NAME=us-lobby-1
+    - SERVER_GROUP=us-lobby
+    - SERVER_CATEGORY=us-lobby
+    - SERVER_TAGS=some,awesome,tags
+    - ONLINE_MODE=FALSE
+    - EULA=true
+    networks:
+    - local
+networks:
+  local:
