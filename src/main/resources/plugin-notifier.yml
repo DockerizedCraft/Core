@@ -1,0 +1,38 @@
+# If you disable it no plugin which depends on this data will work
+# Type: Boolean
+enabled: true
+
+# Outputs extra information
+# Type: Boolean
+debug: true
+
+# Server updates will be sent after any add or remove anyway but the interval is usefull to update i.e. ProxiedPlayer Information
+# Type: Integer
+refresh-interval: 30
+
+# Maps environment variables and forwards them with the specified key to the bukkit client plugin
+# ie. docker run -e CATEGORY=factions
+# Reserved keys as they will be handed down anyway: name, address, motd, restricted (In case you want to overwrite you can do so)
+# Type: Section<String:MetaDataConfig>
+# Type MetaDataConfig:
+#   - environment-variable (string): The environemnt variable to access
+#   - required (bool):               Is this value required? If not given and no default
+#                                    is defined the server will not be added to connectionbalancer
+#   - default (string):              If the environment variable is not defined will fall
+#                                    back to the given default
+meta-data-mapper:
+  # make the SERVER_TYPE also accessible
+  type:
+    required: true
+    environment-variable: SERVER_TYPE
+
+  # Category for i.e create server selector menus based on categories
+  category:
+    environment-variable: SERVER_CATEGORY
+    required: true
+    default: "none"
+
+  tags:
+    environment-variable: SERVER_TAGS
+    required: true
+    default: ""

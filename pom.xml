@@ -6,7 +6,7 @@
 
     <groupId>de.craftmania</groupId>
     <artifactId>ContainerManager</artifactId>
-    <version>0.1-beta1</version>
+    <version>0.1.0</version>
 
     <repositories>
         <repository>
