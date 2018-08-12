@@ -14,10 +14,12 @@ public class PreRemoveServerEvent extends Event {
         this.environmentVariables = environmentVariables;
     }
 
+    @SuppressWarnings("unused")
     public ServerInfo getServerInfo() {
         return serverInfo;
     }
 
+    @SuppressWarnings("unused")
     public Map<String, String> getEnvironmentVariables() {
         return environmentVariables;
     }

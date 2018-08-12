@@ -18,11 +18,9 @@ public class ContainerInspector {
 
     private ProxyServer proxyServer;
 
-
     private String network;
 
     private Logger logger;
-
 
     public ContainerInspector(Configuration configuration, ProxyServer proxyServer, Logger logger) {
         this.proxyServer = proxyServer;
@@ -30,7 +28,6 @@ public class ContainerInspector {
         this.logger = logger;
         this.dockerClient = DockerClientFactory.getByConfiguration(configuration);
     }
-
 
     public void runContainerInspection() {
         this.logger.info("[Container Inspector] Running initial inspection.");

@@ -6,10 +6,12 @@ public class PostRemoveServerEvent extends Event {
 
     private String name;
 
+    @SuppressWarnings("unused")
     public PostRemoveServerEvent(String name) {
         this.name = name;
     }
 
+    @SuppressWarnings("unused")
     public String getName() {
         return name;
     }

@@ -35,23 +35,27 @@ public class Group {
     }
 
 
-
+    @SuppressWarnings({"WeakerAccess", "unused"})
     public String getName() {
         return name;
     }
 
+    @SuppressWarnings({"WeakerAccess", "unused"})
     public void setName(String name) {
         this.name = name;
     }
 
+    @SuppressWarnings({"WeakerAccess", "unused"})
     public Strategy getStrategy() {
         return strategy;
     }
 
+    @SuppressWarnings({"WeakerAccess", "unused"})
     public void setStrategy(Strategy strategy) {
         this.strategy = strategy;
     }
 
+    @SuppressWarnings({"WeakerAccess", "unused"})
     public void setStrategy(String strategy) {
         if (ConnectionBalancer.balanceStrategies.containsKey(strategy)) {
             this.strategy = ConnectionBalancer.balanceStrategies.get(strategy);
@@ -60,18 +64,22 @@ public class Group {
         }
     }
 
+    @SuppressWarnings({"WeakerAccess", "unused"})
     public Boolean getRestricted() {
         return restricted;
     }
 
+    @SuppressWarnings({"WeakerAccess", "unused"})
     public void setRestricted(Boolean restricted) {
         this.restricted = restricted;
     }
 
+    @SuppressWarnings({"WeakerAccess", "unused"})
     public Boolean getCanReconnect() {
         return canReconnect;
     }
 
+    @SuppressWarnings({"WeakerAccess", "unused"})
     public void setCanReconnect(Boolean canReconnect) {
         this.canReconnect = canReconnect;
     }
@@ -81,24 +89,29 @@ public class Group {
         return super.toString() + "{" + this.name + "," + this.strategy + "}";
     }
 
+    @SuppressWarnings({"WeakerAccess", "unused"})
     public Map<String, ServerInfo> getServers() {
         return this.servers;
     }
 
+    @SuppressWarnings({"WeakerAccess", "unused"})
     public void addServer(ServerInfo server) {
         this.servers.put(server.getName(), server);
     }
 
+    @SuppressWarnings({"WeakerAccess", "unused"})
     public ServerInfo getServer(String name) {
         return this.servers.get(name);
     }
 
 
+    @SuppressWarnings({"WeakerAccess", "unused"})
     public void removeServer(ServerInfo server) {
         this.servers.remove(server.getName());
     }
 
 
+    @SuppressWarnings({"WeakerAccess", "unused"})
     public void removeServer(String server) {
         this.servers.remove(server);
     }

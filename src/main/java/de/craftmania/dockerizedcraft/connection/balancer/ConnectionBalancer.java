@@ -13,7 +13,6 @@ import net.md_5.bungee.event.EventHandler;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -169,7 +168,7 @@ public class ConnectionBalancer implements Listener {
         return this.servers.get(server.getName());
     }
 
-    @SuppressWarnings("WeakerAccess")
+    @SuppressWarnings({"WeakerAccess", "unused"})
     public ServerInfo getServer(String name) {
         return this.servers.get(name);
     }
@@ -243,13 +242,12 @@ public class ConnectionBalancer implements Listener {
 
     @EventHandler
     @SuppressWarnings("unused")
-    public void onPluginMessage(PluginMessageEvent event) throws IOException {
+    public void onPluginMessage(PluginMessageEvent event) {
         DataInputStream in = new DataInputStream(new ByteArrayInputStream(event.getData()));
         try {
             String subchanncel = in.readUTF();
             this.logger.info(subchanncel);
-        } catch (Exception e) {
-            return;
+        } catch (Exception ignored) {
         }
     }
 }

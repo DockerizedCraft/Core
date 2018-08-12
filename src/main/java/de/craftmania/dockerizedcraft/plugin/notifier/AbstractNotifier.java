@@ -7,6 +7,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 
 public abstract class AbstractNotifier {
+    @SuppressWarnings("SameParameterValue")
     protected void sendMessage(ServerInfo serverInfo, String channel, String subchannel, String message) {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         DataOutputStream out = new DataOutputStream(stream);

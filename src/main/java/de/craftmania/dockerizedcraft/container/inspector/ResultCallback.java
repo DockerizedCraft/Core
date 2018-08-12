@@ -19,7 +19,7 @@ public class ResultCallback extends EventsResultCallback {
     private ProxyServer proxyServer;
     private String network;
 
-    public ResultCallback(DockerClient dockerClient, ProxyServer proxyServer, String network) {
+    ResultCallback(DockerClient dockerClient, ProxyServer proxyServer, String network) {
         this.dockerClient = dockerClient;
         this.proxyServer = proxyServer;
         this.network = network;

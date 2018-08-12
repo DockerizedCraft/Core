@@ -18,10 +18,14 @@ import java.nio.file.Files;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+
 @SuppressWarnings("unused")
 public class ContainerManager extends Plugin {
     private Map<String, Configuration> configuration;
 
+    /**
+     * Enabled sub-packages depending on the given configuration
+     */
     @Override
     public void onEnable() {
         try {
@@ -58,6 +62,10 @@ public class ContainerManager extends Plugin {
         }
     }
 
+    /**
+     * Bootstraps the Connection Balancer, sets the reconnect handler and adds the registered listener
+     * @param configuration The connection balancer configuration
+     */
     private void bootstrapConnectionBalancer(Configuration configuration) {
         ConnectionBalancer connectionBalancer = new ConnectionBalancer(
                 configuration,
@@ -75,11 +83,19 @@ public class ContainerManager extends Plugin {
         getProxy().getPluginManager().registerListener(this, connectionBalancer);
     }
 
+    /**
+     * Bootstraps the server update and adds it the the registered listeners
+     * @param configuration The server updater configuration
+     */
     private void bootstrapServerUpdater(Configuration configuration) {
         ServerUpdater serverUpdater = new ServerUpdater(configuration, getProxy(), getLogger());
         getProxy().getPluginManager().registerListener(this, serverUpdater);
     }
 
+    /**
+     * Bootstraps the plugin notifier and adds scheduled interval tasks
+     * @param configuration The plugin notifier configuration
+     */
     private void bootstrapPluginNotifier(Configuration configuration) {
         ServerListPluginNotifier notifier = new ServerListPluginNotifier(
                 configuration.getSection("meta-data-mapper"),
@@ -96,19 +112,30 @@ public class ContainerManager extends Plugin {
         );
     }
 
+    /**
+     * Bootstraps the container inspector and runs the inspector and listener as async task through the scheduler
+     * @param configuration The container inspector configuration
+     */
     private void bootstrapContainerInspector(Configuration configuration) {
 
         ContainerInspector containerInspector = new ContainerInspector(configuration, getProxy(), getLogger());
 
         getProxy().getScheduler().runAsync(this, containerInspector::runContainerInspection);
-
         getProxy().getScheduler().runAsync(this, containerInspector::runContainerListener);
-
     }
 
+    /**
+     * Loads the configurations
+     * @throws IOException On missing write access
+     */
     private void loadConfiguration() throws IOException {
 
-        List<String> configNames = Arrays.asList("connection-balancer", "plugin-notifier", "container-inspector", "server-updater");
+        List<String> configNames = Arrays.asList(
+                "connection-balancer",
+                "plugin-notifier",
+                "container-inspector",
+                "server-updater"
+        );
         Map<String, Configuration> configuration = new HashMap<>(configNames.size());
 
 
@@ -139,6 +166,9 @@ public class ContainerManager extends Plugin {
         this.configuration = configuration;
     }
 
+    /**
+     * @return Map containing the sub-package configurations
+     */
     private Map<String, Configuration> getConfiguration() {
         return configuration;
     }
