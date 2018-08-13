@@ -100,6 +100,10 @@ __Example Payload__ (Channel: ContainerManager, Subchannel: ServerData)
 }
 ````
 
+### Configuration
+
+Check [plugin-notifier.yml](/src/main/resources/plugin-notifier.yml)
+
 ## Try it yourself
 
 1. Checkout the repository
