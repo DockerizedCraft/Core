@@ -49,6 +49,7 @@ public class ConnectionBalancer implements Listener {
             Configuration configuration,
             Logger logger
     ) {
+        this.logger = logger;
         this.servers = new HashMap<>();
         this.serverGroups = new HashMap<>();
         this.forcedHostServers = new HashMap<>();
@@ -57,18 +58,27 @@ public class ConnectionBalancer implements Listener {
         this.forcedHostEnvironmentVariable = configuration.getString("environment-variables.forced_host");
 
         this.groups = this.getGroupsByConfiguration(configuration.getSection("groups"));
+        this.logger.info("[Connection Balancer] Added " + this.groups.size() + " server groups.");
+
         this.defaultGroup =
             this.getGroup(configuration.getString("default-group")) != null
             ? this.getGroup(configuration.getString("default-group"))
             : this.getGroup(ConnectionBalancer.defaultGroupName);
 
+        assert this.defaultGroup != null;
+        this.logger.info("[Connection Balancer] Setting default group: " + this.defaultGroup.getName());
+
         this.forcedHostGroups = this.getGroupsForcedHosts(this.groups, configuration.getSection("forced-hosts"));
 
-        this.logger = logger;
+        for (Map.Entry<String, Group> entry: this.forcedHostGroups.entrySet()) {
+            this.logger.info(
+                    "[Connection Balancer] Added forced host: "
+                    + entry.getKey()
+                    + " > "
+                    + entry.getValue().getName()
+            );
+        }
 
-        assert this.defaultGroup != null;
-        this.logger.info("[Connection Balancer] Added " + this.groups.size() + " server groups.");
-        this.logger.info("[Connection Balancer] Setting default group: " + this.defaultGroup.getName());
     }
 
     @SuppressWarnings("WeakerAccess")
@@ -110,11 +120,22 @@ public class ConnectionBalancer implements Listener {
         return null;
     }
 
-    private Map<String, Group> getGroupsForcedHosts(Map<String, Group> groups, Configuration forcedHost) {
-        Map<String, Group> forcedHosts = new HashMap<>(forcedHost.getKeys().size());
-        for (String key : forcedHost.getKeys()) {
-            if (groups.containsKey(forcedHost.getString(key))) {
-                forcedHost.set(key, groups.get(forcedHost.getString(key)));
+    private Map<String, Group> getGroupsForcedHosts(Map<String, Group> groups, Configuration forcedHostConfiguration) {
+
+        Map<String, Group> forcedHosts = new HashMap<>(forcedHostConfiguration.getKeys().size());
+
+        for (String key : forcedHostConfiguration.getKeys()) {
+
+            if (groups.containsKey(forcedHostConfiguration.getString(key))) {
+                forcedHosts.put(key.replace("{dot}", "."), groups.get(forcedHostConfiguration.getString(key)));
+            } else {
+                this.logger.warning(
+                        "[Connection Balancer] Could not add forced host "
+                        + key.replace("{dot}", ".")
+                        + ": Group "
+                        + forcedHostConfiguration.getString(key)
+                        + " does not exists."
+                );
             }
         }
 

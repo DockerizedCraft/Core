@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 
 
 @SuppressWarnings("unused")
-public class ContainerManager extends Plugin {
+public class DockerizedCraft extends Plugin {
     private Map<String, Configuration> configuration;
 
     /**
@@ -73,9 +73,10 @@ public class ContainerManager extends Plugin {
         );
 
         SessionStorage sessionStorage = new RedisSessionStorage(
-                configuration.getString("player_session_store.redis.host"),
-                configuration.getInt("player_session_store.redis.port"),
-                configuration.getBoolean("player_session_store.redis.ssl")
+                configuration.getString("session-store.redis.host"),
+                configuration.getString("session-store.redis.password"),
+                configuration.getInt("session-store.redis.port"),
+                configuration.getBoolean("session-store.redis.ssl")
         );
 
         ReconnectHandler reconnectHandler = new BalancedReconnectHandler(connectionBalancer, sessionStorage);

@@ -14,10 +14,12 @@ session-store:
   redis:
     # Type: String
     host: "redis"
+    # Type: String
+    password: ~
     # Type: Integer
     port: 6379
     # Type: Boolean
-    ssl: false
+    ssl: true
 
 # Environment variables of the containers
 # Type: Section
@@ -70,6 +72,8 @@ groups:
 # Type: String
 default-group: eu-lobby
 
+# Setting force hosts. Use {dot} placeholder for dots to not break yaml syntax
+# Type: Section<String, String>
 forced-hosts:
-  'us.mynetwork.net': us-lobby
-  'eu.mynetwork.net': eu-lobby
+  "us{dot}mynetwork{dot}net": "us-lobby"
+  "eu{dot}mynetwork{dot}net": "eu-lobby"

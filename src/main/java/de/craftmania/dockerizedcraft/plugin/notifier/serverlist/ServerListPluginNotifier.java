@@ -17,7 +17,7 @@ import java.util.logging.Logger;
 public class ServerListPluginNotifier extends AbstractNotifier implements Listener {
     private static String channel;
     static {
-        channel = "ContainerManager";
+        channel = "DockerizedCraft";
     }
 
     private Configuration mappingConfig;
