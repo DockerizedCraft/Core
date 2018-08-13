@@ -7,7 +7,7 @@ services:
     ports:
       - 25565:25577
     volumes:
-      - ./target/assembly/ContainerManager.jar:/server/plugins/ContainerManager.jar
+      - ./target/assembly/DockerizedCraft.jar:/server/plugins/DockerizedCraft.jar
       - //var/run/docker.sock:/var/run/docker.sock
     networks:
       - local

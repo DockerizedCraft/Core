@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>de.craftmania</groupId>
-    <artifactId>ContainerManager</artifactId>
-    <version>0.1.0</version>
+    <artifactId>DockerizedCraft</artifactId>
+    <version>0.2.0</version>
 
     <repositories>
         <repository>

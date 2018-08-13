@@ -1,4 +1,4 @@
-name: ContainerManager
-main: de.craftmania.dockerizedcraft.ContainerManager
-version: 0.1.0
+name: DockerizedCraft
+main: de.craftmania.dockerizedcraft.DockerizedCraft
+version: 0.2.0
 author: Muehre
