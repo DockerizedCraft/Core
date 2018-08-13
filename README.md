@@ -32,7 +32,7 @@ Check [container-inspector.yml](/src/main/resources/container-inspector.yml)
 
 Check [server-updater.yml](/src/main/resources/server-updater.yml)
 
-##Connection Balancer
+## Connection Balancer
 
 ### Features
 
@@ -107,6 +107,6 @@ __Example Payload__ (Channel: ContainerManager, Subchannel: ServerData)
 3. run `docker-compose --project-name minecraft up -d`
 4. Wait until all containers did start and connect to localhost with you Minecraft client
 
-##Todo's
+## Todo's
 
 - Reduce .jar size
