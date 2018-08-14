@@ -1,3 +1,5 @@
+![DockerizedCraft](/docs/logo.png)
+
 Dockerized Craft - Core
 ======================
 
@@ -5,7 +7,7 @@ __Never maintain your Bungeecord manually again! Automatically listens to Docker
 
 Additionally supporting plugin messaging, connection balancing and proxy server list updates.
 
-![DockerizedCraft Preview](https://raw.githubusercontent.com/DockerizedCraft/ContainerManager/master/docs/container-manager-demo.gif)
+![DockerizedCraft Preview](/docs/container-manager-demo.gif)
 
 ## Container Inspector
 
