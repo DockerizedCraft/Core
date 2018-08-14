@@ -1,5 +1,5 @@
-DockerizedCraft - Container Manager
-===================================
+Dockerized Craft - Core
+======================
 
 __Never maintain your Bungeecord manually again! Automatically listens to Docker events and adds servers to BungeeCord.__
 
