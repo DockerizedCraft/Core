@@ -10,6 +10,7 @@ import de.craftmania.dockerizedcraft.server.updater.ServerUpdater;
 import net.md_5.bungee.api.ReconnectHandler;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.*;
+import org.bstats.bungeecord.Metrics;
 
 import java.io.IOException;
 import java.io.File;
@@ -28,6 +29,9 @@ public class DockerizedCraft extends Plugin {
      */
     @Override
     public void onEnable() {
+        // bStats
+        Metrics metrics = new Metrics(this);
+
         try {
             this.loadConfiguration();
         } catch (IOException e) {
