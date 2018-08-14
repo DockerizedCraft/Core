@@ -1,4 +1,4 @@
-![DockerizedCraft](/docs/logo.png)
+![DockerizedCraft](/docs/logo-small.png)
 
 Dockerized Craft - Core
 ======================
