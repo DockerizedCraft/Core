@@ -1,10 +1,12 @@
-[SIZE=6][COLOR=#ff8000][B]DockerizedCraft - Core[/B][/COLOR][/SIZE]
+[B][SIZE=6][COLOR=rgb(255, 128, 0)]DockerizedCraft - Core[/COLOR][/SIZE][/B]
+
+[IMG]https://github.com/DockerizedCraft/Core/raw/master/docs/logo-small.png[/IMG]
 
 [B]Never maintain your Bungeecord manually again! Automatically listens to Docker events and adds servers to BungeeCord.[/B]
 
 Additionally supporting plugin messaging, connection balancing and proxy server list updates.
 
-[URL='https://raw.githubusercontent.com/DockerizedCraft/ContainerManager/master/docs/container-manager-demo.gif'][IMG]https://raw.githubusercontent.com/DockerizedCraft/ContainerManager/master/docs/container-manager-demo.gif[/IMG][/URL]
+[IMG]https://raw.githubusercontent.com/DockerizedCraft/ContainerManager/master/docs/container-manager-demo.gif[/IMG]
 
 [SIZE=5][COLOR=#ff8000][B]Container Inspector[/B][/COLOR][/SIZE]
 
@@ -141,6 +143,7 @@ environment-variables:
 [LIST]
 [*]Server Groups
 [*]Default connection group (Fallback/Default servers)
+[*]Join Group Commands (like /lobby, /hub or /game-xy)
 [*]Forced hosts for groups (i.e. eu lobbies and us lobbies)
 [*]Listens on Container events to add servers to groups based on their environment variables (i.e SERVER_GROUP=lobby)
 [*]Connection Balancing Strategies per group
@@ -227,6 +230,12 @@ groups:
 # And not forced host is matching
 # Type: String
 default-group: eu-lobby
+
+# Commands that players can execute to join a certain group
+# Type Section<String, String>
+join-commands:
+  lobby: eu-lobby
+  hub: eu-lobby
 
 # Setting force hosts. Use {dot} placeholder for dots to not break yaml syntax
 # Type: Section<String, String>
