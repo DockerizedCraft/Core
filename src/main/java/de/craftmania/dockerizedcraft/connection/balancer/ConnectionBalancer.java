@@ -1,5 +1,6 @@
 package de.craftmania.dockerizedcraft.connection.balancer;
 
+import de.craftmania.dockerizedcraft.connection.balancer.command.GroupCommand;
 import de.craftmania.dockerizedcraft.connection.balancer.strategy.BalanceStrategy;
 import de.craftmania.dockerizedcraft.connection.balancer.strategy.Strategy;
 import de.craftmania.dockerizedcraft.server.updater.events.PostAddServerEvent;
@@ -8,6 +9,8 @@ import de.craftmania.dockerizedcraft.connection.balancer.model.Group;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.event.PluginMessageEvent;
 import net.md_5.bungee.api.plugin.Listener;
+import net.md_5.bungee.api.plugin.Plugin;
+import net.md_5.bungee.api.plugin.PluginManager;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.event.EventHandler;
 
@@ -21,6 +24,7 @@ import java.util.logging.Logger;
 public class ConnectionBalancer implements Listener {
 
     private static String defaultGroupName;
+
     static {
         defaultGroupName = "default";
     }
@@ -37,8 +41,10 @@ public class ConnectionBalancer implements Listener {
     private Map<String, Group> forcedHostGroups;
 
     private Logger logger;
+    private Plugin plugin;
 
     public static final Map<String, Strategy> balanceStrategies;
+
     static {
         Map<String, Strategy> strategies = new HashMap<>(1);
         strategies.put("balance", new BalanceStrategy());
@@ -47,38 +53,61 @@ public class ConnectionBalancer implements Listener {
 
     public ConnectionBalancer(
             Configuration configuration,
-            Logger logger
+            Logger logger,
+            Plugin plugin
     ) {
         this.logger = logger;
+        this.plugin = plugin;
         this.servers = new HashMap<>();
         this.serverGroups = new HashMap<>();
         this.forcedHostServers = new HashMap<>();
 
-        this.groupEnvironmentVariable =  configuration.getString("environment-variables.group");
+        this.groupEnvironmentVariable = configuration.getString("environment-variables.group");
         this.forcedHostEnvironmentVariable = configuration.getString("environment-variables.forced_host");
 
         this.groups = this.getGroupsByConfiguration(configuration.getSection("groups"));
         this.logger.info("[Connection Balancer] Added " + this.groups.size() + " server groups.");
 
         this.defaultGroup =
-            this.getGroup(configuration.getString("default-group")) != null
-            ? this.getGroup(configuration.getString("default-group"))
-            : this.getGroup(ConnectionBalancer.defaultGroupName);
+                this.getGroup(configuration.getString("default-group")) != null
+                        ? this.getGroup(configuration.getString("default-group"))
+                        : this.getGroup(ConnectionBalancer.defaultGroupName);
 
         assert this.defaultGroup != null;
         this.logger.info("[Connection Balancer] Setting default group: " + this.defaultGroup.getName());
 
         this.forcedHostGroups = this.getGroupsForcedHosts(this.groups, configuration.getSection("forced-hosts"));
 
-        for (Map.Entry<String, Group> entry: this.forcedHostGroups.entrySet()) {
+        for (Map.Entry<String, Group> entry : this.forcedHostGroups.entrySet()) {
             this.logger.info(
                     "[Connection Balancer] Added forced host: "
-                    + entry.getKey()
-                    + " > "
-                    + entry.getValue().getName()
+                            + entry.getKey()
+                            + " > "
+                            + entry.getValue().getName()
             );
         }
 
+        this.loadCommands(configuration.getSection("join-commands"));
+    }
+
+    private void loadCommands(Configuration joinCommandsConfiguration) {
+        for (String commandName : joinCommandsConfiguration.getKeys()) {
+            if (this.groups.containsKey(joinCommandsConfiguration.getString(commandName))) {
+
+                GroupCommand command = new GroupCommand(
+                        commandName,
+                        this.groups.get(joinCommandsConfiguration.getString(commandName)),
+                        this
+                );
+                this.plugin.getProxy().getPluginManager().registerCommand(this.plugin, command);
+                this.logger.info(
+                        "[Connection Balancer] Registered Group join Command: "
+                                + commandName
+                                + " > "
+                                + joinCommandsConfiguration.getString(commandName)
+                );
+            }
+        }
     }
 
     @SuppressWarnings("WeakerAccess")
@@ -100,7 +129,7 @@ public class ConnectionBalancer implements Listener {
             return this.forcedHostGroups.get(hostname).getStrategy().getServer(this.forcedHostGroups.get(hostname).getServers());
         }
 
-        if(this.forcedHostServers.containsKey(hostname)) {
+        if (this.forcedHostServers.containsKey(hostname)) {
             return this.forcedHostServers.get(hostname);
         }
 
@@ -131,10 +160,10 @@ public class ConnectionBalancer implements Listener {
             } else {
                 this.logger.warning(
                         "[Connection Balancer] Could not add forced host "
-                        + key.replace("{dot}", ".")
-                        + ": Group "
-                        + forcedHostConfiguration.getString(key)
-                        + " does not exists."
+                                + key.replace("{dot}", ".")
+                                + ": Group "
+                                + forcedHostConfiguration.getString(key)
+                                + " does not exists."
                 );
             }
         }
@@ -142,7 +171,7 @@ public class ConnectionBalancer implements Listener {
         return forcedHosts;
     }
 
-    private  Map<String, Group> getGroupsByConfiguration(Configuration groupConfig) {
+    private Map<String, Group> getGroupsByConfiguration(Configuration groupConfig) {
         // Add default group if not configured
         if (!groupConfig.contains(ConnectionBalancer.defaultGroupName)) {
 
@@ -194,6 +223,16 @@ public class ConnectionBalancer implements Listener {
         return this.servers.get(name);
     }
 
+    @SuppressWarnings({"WeakerAccess", "unused"})
+    public String getServerGroup(String name) {
+        return this.serverGroups.get(name);
+    }
+
+    @SuppressWarnings({"WeakerAccess", "unused"})
+    public String getServerGroup(ServerInfo server) {
+        return this.serverGroups.get(server.getName());
+    }
+
     @EventHandler
     @SuppressWarnings("unused")
     public void onPostAddServer(PostAddServerEvent event) {
@@ -211,15 +250,15 @@ public class ConnectionBalancer implements Listener {
         this.groups.get(groupName).addServer(event.getServerInfo());
         this.serverGroups.put(event.getServerInfo().getName(), groupName);
         this.logger.info("[Connection Balancer] Added Server to group: " + event.getServerInfo().getName() + " > " + groupName);
-        if  (event.getEnvironmentVariables().containsKey(this.forcedHostEnvironmentVariable)) {
+        if (event.getEnvironmentVariables().containsKey(this.forcedHostEnvironmentVariable)) {
             String forcedHost = event.getEnvironmentVariables().get(this.forcedHostEnvironmentVariable);
 
             if (this.forcedHostServers.containsKey(forcedHost)) {
                 this.logger.warning(
-                "[Connection Balancer] Overwriting existing Forced Host: "
-                        + forcedHost
-                        + " > "
-                        + this.forcedHostServers.get(forcedHost).getName()
+                        "[Connection Balancer] Overwriting existing Forced Host: "
+                                + forcedHost
+                                + " > "
+                                + this.forcedHostServers.get(forcedHost).getName()
                 );
             }
 
@@ -248,7 +287,7 @@ public class ConnectionBalancer implements Listener {
         this.logger.info("[Connection Balancer] Removing Server: " + event.getServerInfo().getName());
         this.removeServer(server);
 
-        for (String entry: this.forcedHostServers.keySet()) {
+        for (String entry : this.forcedHostServers.keySet()) {
             if (this.forcedHostServers.get(entry).getName().equals(server.getName())) {
                 this.logger.info("[Connection Balancer] Removing Server Forced Host: "
                         + entry

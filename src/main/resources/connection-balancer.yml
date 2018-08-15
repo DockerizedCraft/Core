@@ -72,6 +72,12 @@ groups:
 # Type: String
 default-group: eu-lobby
 
+# Commands that players can execute to join a certain group
+# Type Section<String, String>
+join-commands:
+  lobby: eu-lobby
+  hub: eu-lobby
+
 # Setting force hosts. Use {dot} placeholder for dots to not break yaml syntax
 # Type: Section<String, String>
 forced-hosts:

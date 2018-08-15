@@ -73,7 +73,8 @@ public class DockerizedCraft extends Plugin {
     private void bootstrapConnectionBalancer(Configuration configuration) {
         ConnectionBalancer connectionBalancer = new ConnectionBalancer(
                 configuration,
-                getLogger()
+                getLogger(),
+                this
         );
 
         SessionStorage sessionStorage = new RedisSessionStorage(
