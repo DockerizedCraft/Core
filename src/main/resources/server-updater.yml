@@ -47,6 +47,11 @@ environment-variables:
   # Type: String
   port: SERVER_PORT
 
+  # If you chose to not make the servers publicly available you can specify a DNS/IP entry
+  # that points to your container. Will be 0.0.0.0 by default.
+  # Type: String
+  ip: SERVER_IP
+
   # Setting the motd in the Bungeecord setting
   # i.e. docker run -e SERVER_FORCED_HOST="Another Minecraft Server" playerworld:latest
   # Type: String
