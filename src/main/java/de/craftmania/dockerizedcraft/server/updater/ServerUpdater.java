@@ -23,6 +23,8 @@ public class ServerUpdater implements Listener {
 
     private String portKey;
 
+    private String ipKey;
+
     private String motdKey;
 
     private String restrictedKey;
@@ -41,6 +43,7 @@ public class ServerUpdater implements Listener {
         this.identifierKey = configuration.getString("environment-variables.identifier");
         this.nameKey = configuration.getString("environment-variables.name");
         this.portKey = configuration.getString("environment-variables.port");
+        this.ipKey = configuration.getString("environment-variables.ip");
         this.motdKey = configuration.getString("environment-variables.motd");
         this.restrictedKey = configuration.getString("environment-variables.restricted");
         this.addActionList = configuration.getStringList("add-actions");
@@ -156,8 +159,14 @@ public class ServerUpdater implements Listener {
                 ? Integer.parseInt(eventData.getEnvironmentVariables().get(this.portKey))
                 : (eventData.getPort() != null ? eventData.getPort() : 25565);
 
-        InetSocketAddress inetSocketAddress = new InetSocketAddress(eventData.getIp(), port);
 
+        String ip = eventData.getEnvironmentVariables().get(this.ipKey);
+        InetSocketAddress inetSocketAddress;
+        if(ip != null){
+            inetSocketAddress = new InetSocketAddress(ip, port);
+        }else{
+            inetSocketAddress = new InetSocketAddress(eventData.getIp(), port);
+        }
 
         // Getting the motd
         String motd = eventData.getEnvironmentVariables().get(this.motdKey) != null
