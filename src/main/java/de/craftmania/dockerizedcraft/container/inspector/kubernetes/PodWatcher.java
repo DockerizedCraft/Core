@@ -1,4 +1,4 @@
-package de.craftmania.dockerizedcraft.container.inspector;
+package de.craftmania.dockerizedcraft.container.inspector.kubernetes;
 import net.md_5.bungee.api.ProxyServer;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.Watcher;
@@ -13,7 +13,7 @@ public class PodWatcher implements Watcher<Pod> {
 
     private ProxyServer proxyServer;
     private Logger logger;
-    public PodWatcher(ProxyServer proxyServer, Logger logger) {
+    PodWatcher(ProxyServer proxyServer, Logger logger) {
         this.proxyServer = proxyServer;
         this.logger = logger;
     }

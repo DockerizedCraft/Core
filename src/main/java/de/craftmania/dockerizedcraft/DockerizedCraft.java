@@ -4,7 +4,9 @@ import de.craftmania.dockerizedcraft.connection.balancer.BalancedReconnectHandle
 import de.craftmania.dockerizedcraft.connection.balancer.ConnectionBalancer;
 import de.craftmania.dockerizedcraft.connection.balancer.session.RedisSessionStorage;
 import de.craftmania.dockerizedcraft.connection.balancer.session.SessionStorage;
-import de.craftmania.dockerizedcraft.container.inspector.ContainerInspector;
+import de.craftmania.dockerizedcraft.container.inspector.IContainerInspector;
+import de.craftmania.dockerizedcraft.container.inspector.docker.DockerContainerInspector;
+import de.craftmania.dockerizedcraft.container.inspector.kubernetes.KubernetesContainerInspector;
 import de.craftmania.dockerizedcraft.plugin.notifier.serverlist.ServerListPluginNotifier;
 import de.craftmania.dockerizedcraft.server.updater.ServerUpdater;
 import net.md_5.bungee.api.ReconnectHandler;
@@ -124,7 +126,12 @@ public class DockerizedCraft extends Plugin {
      */
     private void bootstrapContainerInspector(Configuration configuration) {
 
-        ContainerInspector containerInspector = new ContainerInspector(configuration, getProxy(), getLogger());
+        IContainerInspector containerInspector;
+        if (configuration.getString("backend").equals("docker")) {
+            containerInspector = new DockerContainerInspector(configuration, getProxy(), getLogger());
+        } else {
+            containerInspector = new KubernetesContainerInspector(configuration, getProxy(), getLogger());
+        }
 
         getProxy().getScheduler().runAsync(this, containerInspector::runContainerInspection);
         getProxy().getScheduler().runAsync(this, containerInspector::runContainerListener);

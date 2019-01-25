@@ -6,29 +6,35 @@ enabled: true
 # Type: Boolean
 debug: true
 
+# Backend type (docker or kubernetes)
+backend: docker
+
 # Ensure the read permissions
 # available schemas: tcp or unix
 # Type: String
-host: unix:///var/run/docker.sock
+docker:
+  host: unix:///var/run/docker.sock
 
-# Type: Boolean
-tsl-verify: false
+  # Type: Boolean
+  tsl-verify: false
 
-# Type: String|null
-cert-path: ~
+  # Type: String|null
+  cert-path: ~
 
-# Type: Section<String, String>
-registry:
-  # Type: String|null
-  username: ~
-  # Type: String|null
-  password: ~
-  # Type: String|null
-  email: ~
-  # Type: String|null
-  url: ~
+  # Type: Section<String, String>
+  registry:
+    # Type: String|null
+    username: ~
+    # Type: String|null
+    password: ~
+    # Type: String|null
+    email: ~
+    # Type: String|null
+    url: ~
 
-# The network name to resolve IP addresses
-# Only one network is possible to avoid confusion about which ip to use
-# check your networks with `docker network ls`
-network: "minecraft_local"
+  # The network name to resolve IP addresses
+  # Only one network is possible to avoid confusion about which ip to use
+  # check your networks with `docker network ls`
+  network: "minecraft_local"
+
+kubernetes:
