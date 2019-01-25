@@ -1,4 +1,4 @@
-package de.craftmania.dockerizedcraft.container.inspector.client;
+package de.craftmania.dockerizedcraft.container.inspector.docker;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
@@ -6,17 +6,17 @@ import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.core.DockerClientConfig;
 import net.md_5.bungee.config.Configuration;
 
-public class DockerClientFactory {
+class DockerClientFactory {
 
-    public static DockerClient getByConfiguration(Configuration configuration) {
+    static DockerClient getByConfiguration(Configuration configuration) {
         return DockerClientFactory.get(
-                configuration.getString("host"),
-                configuration.getBoolean("tsl-verify"),
-                configuration.getString("cert-path"),
-                configuration.getString("registry.username"),
-                configuration.getString("registry.password"),
-                configuration.getString("registry.email"),
-                configuration.getString("registry.url")
+                configuration.getString("docker.host"),
+                configuration.getBoolean("docker.tsl-verify"),
+                configuration.getString("docker.cert-path"),
+                configuration.getString("docker.registry.username"),
+                configuration.getString("docker.registry.password"),
+                configuration.getString("docker.registry.email"),
+                configuration.getString("docker.registry.url")
         );
     }
 

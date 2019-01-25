@@ -1,11 +1,11 @@
-package de.craftmania.dockerizedcraft.container.inspector;
+package de.craftmania.dockerizedcraft.container.inspector.docker;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.model.Container;
 import com.github.dockerjava.api.model.Event;
 import com.github.dockerjava.api.model.EventType;
 import com.github.dockerjava.core.command.EventsResultCallback;
-import de.craftmania.dockerizedcraft.container.inspector.client.DockerClientFactory;
+import de.craftmania.dockerizedcraft.container.inspector.IContainerInspector;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.config.Configuration;
 
@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.logging.Logger;
 
-public class ContainerInspector {
+public class DockerContainerInspector implements IContainerInspector {
     private DockerClient dockerClient;
 
     private ProxyServer proxyServer;
@@ -22,15 +22,15 @@ public class ContainerInspector {
 
     private Logger logger;
 
-    public ContainerInspector(Configuration configuration, ProxyServer proxyServer, Logger logger) {
+    public DockerContainerInspector(Configuration configuration, ProxyServer proxyServer, Logger logger) {
         this.proxyServer = proxyServer;
-        this.network = configuration.getString("network");
+        this.network = configuration.getString("docker.network");
         this.logger = logger;
         this.dockerClient = DockerClientFactory.getByConfiguration(configuration);
     }
 
     public void runContainerInspection() {
-        this.logger.info("[Container Inspector] Running initial inspection.");
+        this.logger.info("[Docker Container Inspector] Running initial inspection.");
 
         EventsResultCallback callback = this.getEventResultCallback();
         List<Container> containers = this.dockerClient.listContainersCmd().exec();
@@ -46,7 +46,7 @@ public class ContainerInspector {
     }
 
     public void runContainerListener() {
-        this.logger.info("[Container Inspector] Running listener.");
+        this.logger.info("[Docker Container Inspector] Running listener.");
         try {
             this.dockerClient.eventsCmd().exec(this.getEventResultCallback()).awaitCompletion().close();
         } catch (IOException |InterruptedException e) {

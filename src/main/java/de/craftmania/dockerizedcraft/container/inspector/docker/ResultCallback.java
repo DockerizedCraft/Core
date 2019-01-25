@@ -1,4 +1,4 @@
-package de.craftmania.dockerizedcraft.container.inspector;
+package de.craftmania.dockerizedcraft.container.inspector.docker;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.InspectContainerResponse;
