@@ -23,11 +23,13 @@ public class KubernetesContainerInspector implements IContainerInspector {
 
     public void runContainerInspection() {
         this.logger.info("[Kubernetes Container Inspector] Connecting to kubernetes.");
-        client = new DefaultKubernetesClient();
+        this.client = new DefaultKubernetesClient();
     }
 
     public void runContainerListener() {
         this.logger.info("[Kubernetes Container Inspector] Running listener.");
-        client.pods().inNamespace(configuration.getString("kubernetes.namespace")).withLabel("dockerizedcraft/enabled=true").watch(new PodWatcher(proxyServer, logger));
+        String namespace = configuration.getString("kubernetes.namespace");
+        if(namespace == null ||namespace.isEmpty()) this.logger.severe("kubernetes.namespace not set.");
+        this.client.pods().inNamespace(namespace).withLabel("dockerizedcraft/enabled=true").watch(new PodWatcher(proxyServer, logger));
     }
 }

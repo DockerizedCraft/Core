@@ -25,17 +25,15 @@
                             <relocations>
                                 <relocation>
                                     <pattern>org.bstats</pattern>
-                                    <!-- Replace this with your package! -->
-                                    <shadedPattern>your.package</shadedPattern>
+                                    <shadedPattern>de.craftmania.dockerizedcraft</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>
                     </execution>
                 </executions>
-
                 <configuration>
                     <shadedArtifactAttached>true</shadedArtifactAttached>
-                    <createDependencyReducedPom>true</createDependencyReducedPom>
+                    <createDependencyReducedPom>false</createDependencyReducedPom>
                     <minimizeJar>false</minimizeJar>
                     <filters>
                         <filter>
@@ -65,7 +63,6 @@
             <id>bungeecord-repo</id>
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </repository>
-
         <repository>
             <id>bstats-repo</id>
             <url>http://repo.bstats.org/content/repositories/releases/</url>
@@ -86,12 +83,6 @@
             <version>1.12-SNAPSHOT</version>
             <type>javadoc</type>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.kubernetes</groupId>
-            <artifactId>client-java</artifactId>
-            <version>3.0.0</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
@@ -122,13 +113,17 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-pool2</artifactId>
+            <version>2.4.2</version>
+        </dependency>
+        <dependency>
             <groupId>org.bstats</groupId>
             <artifactId>bstats-bungeecord</artifactId>
             <version>1.2</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
-
     <properties>
     </properties>
 </project>
