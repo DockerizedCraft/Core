@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: minecraft
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: minecraft
+  name: dockerizedcraft-pod-reader
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "watch", "list"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  namespace: minecraft
+  name: dockerizedcraft-account
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: dockerizedcraft-pod-reader-rolebinding
+  namespace: minecraft
+subjects:
+- kind: ServiceAccount
+  name: dockerizedcraft-account
+  namespace: minecraft
+roleRef:
+  kind: Role
+  name: dockerizedcraft-pod-reader
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: apps/v1beta2
+kind: StatefulSet
+metadata:
+  name: bungeecord
+  namespace: minecraft
+spec:
+  selector:
+    matchLabels:
+      workload.user.cattle.io/workloadselector: statefulSet-dockerizedcraft-bungeecord
+  serviceName: bungeecord
+  template:
+    metadata:
+      labels:
+        workload.user.cattle.io/workloadselector: statefulSet-dockerizedcraft-bungeecord
+    spec:
+      serviceAccountName: dockerizedcraft-account
+      containers:
+      - image: itzg/bungeecord
+        imagePullPolicy: Always
+        name: bungeecord
+        ports:
+        - containerPort: 25577
+          name: 25577tcp255771
+          protocol: TCP
+        resources: {}

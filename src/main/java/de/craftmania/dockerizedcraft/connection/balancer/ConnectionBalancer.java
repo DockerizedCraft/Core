@@ -138,6 +138,7 @@ public class ConnectionBalancer implements Listener {
 
     @SuppressWarnings("WeakerAccess")
     public ServerInfo getFallbackServer() {
+        this.logger.info("Found " + this.defaultGroup.getServers().size() + " default servers");
         return this.defaultGroup.getStrategy().getServer(this.defaultGroup.getServers());
     }
 

@@ -20,21 +20,27 @@ public class PodWatcher implements Watcher<Pod> {
 
     @Override
     public void eventReceived(Action action, Pod resource) {
-        logger.info(action.name());
-        logger.info(resource.getStatus().getPhase());
-        logger.info(resource.getStatus().getPodIP());
-        logger.info(resource.getMetadata().getName());
-        logger.info(resource.getSpec().getContainers().get(0).getEnv().toString());
-        logger.info(resource.getMetadata().getLabels().toString());
-
         try {
-            ContainerEvent containerEvent = new ContainerEvent(resource.getMetadata().getName(), action.name());
+            logger.info("action: "+action);
+            logger.info("phase: " +resource.getStatus().getPhase());
+            logger.info("labels: "+resource.getMetadata().getLabels().toString());
+
+            String dockerAction = "stop";
+            if(resource.getStatus().getPhase().equals("Running")){
+                dockerAction = "start";
+            }
+
+            ContainerEvent containerEvent = new ContainerEvent(resource.getMetadata().getName(), dockerAction);
             containerEvent.setName(resource.getMetadata().getName());
+            logger.info("name: " +resource.getMetadata().getName());
             Map<String ,String > environmentVariables = new HashMap<>();
             for (EnvVar i : resource.getSpec().getContainers().get(0).getEnv()) environmentVariables.put(i.getName(),i.getValue());
             containerEvent.setEnvironmentVariables(environmentVariables);
+            logger.info("env:" + environmentVariables);
             containerEvent.setPort(Integer.parseInt(environmentVariables.get("SERVER_PORT")));
+            logger.info("port: "+environmentVariables.get("SERVER_PORT"));
             containerEvent.setIp(InetAddress.getByName(resource.getStatus().getPodIP()));
+            logger.info("ip: "+resource.getStatus().getPodIP());
             this.proxyServer.getPluginManager().callEvent(containerEvent);
         }catch(java.net.UnknownHostException ex){
             logger.severe(ex.getMessage());

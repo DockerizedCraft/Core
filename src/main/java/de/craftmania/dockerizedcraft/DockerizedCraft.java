@@ -86,7 +86,7 @@ public class DockerizedCraft extends Plugin {
                 configuration.getBoolean("session-store.redis.ssl")
         );
 
-        ReconnectHandler reconnectHandler = new BalancedReconnectHandler(connectionBalancer, sessionStorage);
+        ReconnectHandler reconnectHandler = new BalancedReconnectHandler(connectionBalancer, sessionStorage, this.getLogger());
         getProxy().setReconnectHandler(reconnectHandler);
         getProxy().getPluginManager().registerListener(this, connectionBalancer);
     }

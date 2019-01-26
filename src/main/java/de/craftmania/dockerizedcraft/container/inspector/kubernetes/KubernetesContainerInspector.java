@@ -19,11 +19,11 @@ public class KubernetesContainerInspector implements IContainerInspector {
         this.proxyServer = proxyServer;
         this.logger = logger;
         this.configuration = configuration;
+        this.client = new DefaultKubernetesClient();
     }
 
     public void runContainerInspection() {
         this.logger.info("[Kubernetes Container Inspector] Connecting to kubernetes.");
-        this.client = new DefaultKubernetesClient();
     }
 
     public void runContainerListener() {

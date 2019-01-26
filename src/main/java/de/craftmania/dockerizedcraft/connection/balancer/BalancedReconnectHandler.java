@@ -5,20 +5,24 @@ import de.craftmania.dockerizedcraft.connection.balancer.session.SessionStorage;
 import net.md_5.bungee.api.ReconnectHandler;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
+import java.util.logging.Logger;
 
 public class BalancedReconnectHandler implements ReconnectHandler {
     private ConnectionBalancer connectionBalancer;
     private SessionStorage sessionStorage;
+    private Logger logger;
 
-    public BalancedReconnectHandler(ConnectionBalancer connectionBalancer, SessionStorage sessionStorage) {
+    public BalancedReconnectHandler(ConnectionBalancer connectionBalancer, SessionStorage sessionStorage, Logger logger) {
         this.connectionBalancer = connectionBalancer;
         this.sessionStorage = sessionStorage;
+        this.logger = logger;
     }
 
     @Override
     public ServerInfo getServer(ProxiedPlayer proxiedPlayer) {
         ServerInfo serverInfo = null;
 
+        logger.info("Looking for a server to match: hostname="+proxiedPlayer.getPendingConnection().getVirtualHost().getHostName()+", session="+this.sessionStorage.getReconnectServer(proxiedPlayer.getUniqueId()));
         if (proxiedPlayer.getPendingConnection().getVirtualHost().getHostName() != null) {
             serverInfo = this.connectionBalancer.getForcedServer(proxiedPlayer.getPendingConnection().getVirtualHost().getHostName());
         }
