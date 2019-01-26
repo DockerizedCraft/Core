@@ -30,6 +30,6 @@ public class KubernetesContainerInspector implements IContainerInspector {
         this.logger.info("[Kubernetes Container Inspector] Running listener.");
         String namespace = configuration.getString("kubernetes.namespace");
         if(namespace == null ||namespace.isEmpty()) this.logger.severe("kubernetes.namespace not set.");
-        this.client.pods().inNamespace(namespace).withLabel("dockerizedcraft/enabled=true").watch(new PodWatcher(proxyServer, logger));
+        this.client.pods().inNamespace(namespace).watch(new PodWatcher(proxyServer, logger));
     }
 }

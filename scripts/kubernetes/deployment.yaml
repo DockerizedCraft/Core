@@ -33,28 +33,351 @@ roleRef:
   name: dockerizedcraft-pod-reader
   apiGroup: rbac.authorization.k8s.io
 ---
-apiVersion: apps/v1beta2
-kind: StatefulSet
+apiVersion: v1
+data:
+  connection-balancer.yml: |-
+    # Care if you disable it you will need to configure default, priority and fallback servers by hand
+    # Or use an different connection balancer handler plugin (Is it compatible?)
+    # Type: Boolean
+    enabled: true
+
+    # Outputs extra information
+    # Type: Boolean
+    debug: true
+
+    # To store player session for the reconnect handler
+    # Type: Section
+    session-store:
+      # Type: Section
+      redis:
+        # Type: String
+        host: "redis"
+        # Type: String
+        password: ~
+        # Type: Integer
+        port: 6379
+        # Type: Boolean
+        ssl: true
+
+    # Environment variables of the containers
+    # Type: Section
+    environment-variables:
+      # If the environment variable is set the server will be added to the priority list of connectionbalancer
+      # This plugin implemented a custom load balancer which will use defined groups
+      # Leaving the env variable blank will add the server to the default group
+      # Type: String
+      group: SERVER_GROUP
+
+      # To enable forced host for the single instance.
+      # You can also configure a forced host for a whole group. See groups config. I would recommend to do so events with single instances
+      # i.e. docker run -e SERVER_FORCED_HOST=muehre.craftmania.de playerworld:latest
+      # Type: String
+      forced-host: SERVER_FORCED_HOST
+
+    # Type: Section
+    # check docker.event_listener.environment_variables.group_key
+    groups:
+      # Server group configuration
+      # default group is used if a a container does not have a group environment variable. You can also configure it here
+      # Type: Section<Group>
+      # Group:
+      # - strategy(String): balance is the only strategy atm. I will implement more as soon as they are required
+      # - forced_host(String) Optional: people joining over this host will be send to this group
+      # - can-reconnect(Boolean) Default: false: if a player can reconnect to this group. Usefull to  disable for i.e minigames
+      # - restricted(Boolean) Default: false: Is a permission required?
+      lobby:
+        strategy: balance
+        can-reconnect: true
+        restricted: false
+
+      server:
+        strategy: balance
+        can-reconnect: false
+        restricted: false
+
+    # The default group a user is connected to if he freshly joins or his group was restricted in re-connections.
+    # And not forced host is matching
+    # Type: String
+    default-group: lobby
+
+    # Commands that players can execute to join a certain group
+    # Type Section<String, String>
+    join-commands:
+      lobby: lobby
+      hub: lobby
+
+    # Setting force hosts. Use {dot} placeholder for dots to not break yaml syntax
+    # Type: Section<String, String>
+    forced-hosts:
+    #  "us{dot}mynetwork{dot}net": "us-lobby"
+    #  "eu{dot}mynetwork{dot}net": "eu-lobby"
+  container-inspector.yml: |-
+    # Is the docker listener enabled? This is the core functionality and should stay enabled
+    # Type: Boolean
+    enabled: true
+
+    # Outputs extra information
+    # Type: Boolean
+    debug: true
+
+    # Backend type (docker or kubernetes)
+    backend: kubernetes
+
+    # Ensure the read permissions
+    # available schemas: tcp or unix
+    # Type: String
+    docker:
+      host: unix:///var/run/docker.sock
+
+      # Type: Boolean
+      tsl-verify: false
+
+      # Type: String|null
+      cert-path: ~
+
+      # Type: Section<String, String>
+      registry:
+        # Type: String|null
+        username: ~
+        # Type: String|null
+        password: ~
+        # Type: String|null
+        email: ~
+        # Type: String|null
+        url: ~
+
+      # The network name to resolve IP addresses
+      # Only one network is possible to avoid confusion about which ip to use
+      # check your networks with `docker network ls`
+      network: "minecraft_local"
+
+    kubernetes:
+      # The namespace that bungeecord and all minecraft servers reside in
+      namespace: minecraft
+  plugin-notifier.yml: |-
+    # If you disable it no plugin which depends on this data will work
+    # Type: Boolean
+    enabled: true
+
+    # Outputs extra information
+    # Type: Boolean
+    debug: true
+
+    # Server updates will be sent after any add or remove anyway but the interval is usefull to update i.e. ProxiedPlayer Information
+    # Type: Integer
+    refresh-interval: 30
+
+    # Maps environment variables and forwards them with the specified key to the bukkit client plugin
+    # ie. docker run -e CATEGORY=factions
+    # Reserved keys as they will be handed down anyway: name, address, motd, restricted (In case you want to overwrite you can do so)
+    # Type: Section<String:MetaDataConfig>
+    # Type MetaDataConfig:
+    #   - environment-variable (string): The environemnt variable to access
+    #   - required (bool):               Is this value required? If not given and no default
+    #                                    is defined the server will not be added to connectionbalancer
+    #   - default (string):              If the environment variable is not defined will fall
+    #                                    back to the given default
+    meta-data-mapper:
+      # make the SERVER_TYPE also accessible
+      type:
+        required: true
+        environment-variable: SERVER_TYPE
+
+      # Category for i.e create server selector menus based on categories
+      category:
+        environment-variable: SERVER_CATEGORY
+        required: true
+        default: "none"
+
+      tags:
+        environment-variable: SERVER_TAGS
+        required: true
+        default: ""
+  server-updater.yml: |-
+    # Is the Server update enabled?
+    # Type: Boolean
+    enabled: true
+
+    # Extra output
+    # Type: Boolean
+    debug: false
+
+    # Container events actions to listen on for adding server
+    # i.e.: "start", "health-status: healthy"
+    # Recommended "start", "bootstrap" and health checks
+    # the "bootstrap" events is triggered when connectionbalancer starts to register all running containers. Should ne be removed
+    # If you want to add only healthy containers be aware of removing "start" action
+    # @see https://docs.docker.com/engine/reference/commandline/events/#object-types
+    # Type: List
+    add-actions:
+    - "bootstrap"
+    - "start"
+    - "health_status: healthy"
+    - "unpause"
+    - "ADDED"
+
+    # Container events actions to listen on for remving server
+    # i.e.: "kill", "die"
+    # Recommended "die" and health checks
+    # If you want to remove unhealthy containers add i.e: "health_status: unhealthy"
+    # @see https://docs.docker.com/engine/reference/commandline/events/#object-types
+    # Type: List
+    remove-actions:
+    - "kill"
+    - "die"
+    - "stop"
+    - "pause"
+    - "MODIFIED"
+    - "PENDING"
+    - "DELETED"
+
+
+
+    # Environment variables of the containers
+    # Type: Section
+    environment-variables:
+      # The events listener will only add server with the defined environment variable
+      # ie. docker run -e SERVER_TYPE=minecraft_spigot my_server
+      # Type: String
+      identifier: SERVER_TYPE
+
+      # Be default the first exposed port is taken if the container exposes multiple ports you can
+      # set it by setting the PORT environment variable in the container
+      # If you exposed multiple ports its highly recommended to set the environment variable
+      # Type: String
+      port: SERVER_PORT
+
+      # Setting the motd in the Bungeecord setting
+      # i.e. docker run -e SERVER_FORCED_HOST="Another Minecraft Server" playerworld:latest
+      # Type: String
+      motd: SERVER_MOTD
+
+      # Setting the server to restricted
+      # If not set it is false, only excepts: "restricted" or "unrestricted"
+      # i.e. docker run -e SERVER_RESTRICTED=true playerworld:latest
+      # Type: String
+      restricted: SERVER_RESTRICTED
+
+      # Each server name needs to be unique
+      # If you are not able to control if it is unique (autoscaling or whatever) you should not set it in your container
+      # If you do not set the environment variable the container name itself will be used
+      # Two server with the same name will overwrite each other
+      # Type: String
+      name: SERVER_NAME
+kind: ConfigMap
+metadata:
+  name: dockerizedcraft-config
+  namespace: minecraft
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
 metadata:
   name: bungeecord
   namespace: minecraft
 spec:
+  replicas: 1
   selector:
     matchLabels:
-      workload.user.cattle.io/workloadselector: statefulSet-dockerizedcraft-bungeecord
-  serviceName: bungeecord
+      dockerizedcraft/set: bungeecord
   template:
     metadata:
       labels:
-        workload.user.cattle.io/workloadselector: statefulSet-dockerizedcraft-bungeecord
+        dockerizedcraft/set: bungeecord
     spec:
-      serviceAccountName: dockerizedcraft-account
       containers:
-      - image: itzg/bungeecord
+      - env:
+        - name: UID
+          value: "1000"
+        image: itzg/bungeecord
         imagePullPolicy: Always
         name: bungeecord
         ports:
         - containerPort: 25577
-          name: 25577tcp255771
+          hostPort: 25565
+          name: 25577tcp255650
           protocol: TCP
-        resources: {}
+        volumeMounts:
+        - mountPath: /server/plugins/DockerizedCraft.jar
+          name: bungeecord-claim-dockerizedcraft
+          subPath: DockerizedCraft.jar
+        - mountPath: /server/plugins/DockerizedCraft/
+          name: dockerizedcraft-config
+      serviceAccount: dockerizedcraft-account
+      serviceAccountName: dockerizedcraft-account
+      volumes:
+      - name: bungeecord-claim-dockerizedcraft
+        persistentVolumeClaim:
+        claimName: bungeecord-claim-dockerizedcraft
+      - configMap:
+          defaultMode: 256
+          name: dockerizedcraft-config
+          optional: false
+        name: dockerizedcraft-config
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: lobby
+  namespace: minecraft
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      dockerizedcraft/set: lobby
+  template:
+    metadata:
+      labels:
+        dockerizedcraft/enabled: "true"
+        dockerizedcraft/set: lobby
+    spec:
+      containers:
+      - env:
+        - name: EULA
+          value: "true"
+        - name: ONLINE_MODE
+          value: "FALSE"
+        - name: SERVER_GROUP
+          value: lobby
+        - name: SERVER_PORT
+          value: "25565"
+        - name: SERVER_TYPE
+          value: spigot
+        - name: VERSION
+          value: 1.12.2
+        image: itzg/minecraft-server
+        imagePullPolicy: Always
+        name: lobby
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: server
+  namespace: minecraft
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      dockerizedcraft/set: server
+  template:
+    metadata:
+      labels:
+        dockerizedcraft/enabled: "true"
+        dockerizedcraft/set: server
+    spec:
+      containers:
+      - env:
+        - name: EULA
+          value: "true"
+        - name: ONLINE_MODE
+          value: "FALSE"
+        - name: SERVER_GROUP
+          value: server
+        - name: SERVER_PORT
+          value: "25565"
+        - name: SERVER_TYPE
+          value: spigot
+        - name: VERSION
+          value: 1.12.2
+        image: itzg/minecraft-server
+        imagePullPolicy: Always
+        name: server
