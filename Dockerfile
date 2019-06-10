@@ -1,7 +1,7 @@
 FROM maven as build
 
 WORKDIR /build
-COPY src /build/
+COPY src /build/src
 COPY pom.xml /build/
 RUN mvn package
 
