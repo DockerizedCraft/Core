@@ -32,7 +32,7 @@ public class DockerizedCraft extends Plugin {
     @Override
     public void onEnable() {
         // bStats
-        Metrics metrics = new Metrics(this);
+        //Metrics metrics = new Metrics(this);
 
         try {
             this.loadConfiguration();
