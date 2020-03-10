@@ -37,9 +37,9 @@ remove-actions:
 # Type: Section
 environment-variables:
   # The events listener will only add server with the defined environment variable
-  # ie. docker run -e SERVER_TYPE=minecraft_spigot my_server
+  # ie. docker run -e TYPE=minecraft_spigot my_server
   # Type: String
-  identifier: SERVER_TYPE
+  identifier: TYPE
 
   # Be default the first exposed port is taken if the container exposes multiple ports you can
   # set it by setting the PORT environment variable in the container

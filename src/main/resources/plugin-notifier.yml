@@ -21,10 +21,10 @@ refresh-interval: 30
 #   - default (string):              If the environment variable is not defined will fall
 #                                    back to the given default
 meta-data-mapper:
-  # make the SERVER_TYPE also accessible
+  # make the TYPE also accessible
   type:
     required: true
-    environment-variable: SERVER_TYPE
+    environment-variable: TYPE
 
   # Category for i.e create server selector menus based on categories
   category:
